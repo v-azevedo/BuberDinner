@@ -31,7 +31,27 @@
 - Concepts/Patterns: Aggregates, Aggregates Roots, ValueObjects, Entities,
   Domain Errors, Domain Events
 
+### Dependency Injection in Clean Architecture
+
+- File `DependencyInjection.cs` created inside the Application Layer with the
+  objective of registering all dependencies injections related to this layer.
+- Requires the package `Microsoft.Extensions.DependencyInjection.Abstractions`.
+
+```c#
+public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        return services;
+    }
+```
+
+- `builder.Services.AddApplication();`
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
   file.
+- Records can be created as follows:
+  `public record RegisterRequest(Guid Id, string FirstName, string LastName);`
+- Multiple methods can be chained when registering a service:
+  `builder.Services.AddApplication().AddInfrastructure();`
