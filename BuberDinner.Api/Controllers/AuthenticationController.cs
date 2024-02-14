@@ -20,12 +20,35 @@ public class AuthenticationController : ControllerBase
     {
         var authResult = _authenticatitonService.Login(request.Email, request.Password);
 
-        return Ok();
+        var response = new AuthenticationResponse(
+            authResult.Id,
+            authResult.FirstName,
+            authResult.LastName,
+            authResult.Email,
+            authResult.Token
+        );
+
+        return Ok(response);
     }
 
     [HttpPost("register")]
     public IActionResult Register(RegisterRequest request)
     {
-        return Ok();
+        var authResult = _authenticatitonService.Register(
+            request.FirstName,
+            request.Lastname,
+            request.Email,
+            request.Password
+        );
+
+        var response = new AuthenticationResponse(
+            authResult.Id,
+            authResult.FirstName,
+            authResult.LastName,
+            authResult.Email,
+            authResult.Token
+        );
+
+        return Ok(response);
     }
 }
