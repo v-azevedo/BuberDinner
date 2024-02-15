@@ -118,7 +118,7 @@ public static IServiceCollection AddInfrastructure(this IServiceCollection servi
 
 - `dotnet user-secrets init --project BuberDinner.Api/`: Initialize
   user-secrets.
-- `dotnet user-secrets set --project BuberDinner.Api/ "JwtSettings:Secrets" "super-secret-key-from-user-secrets"`:
+- `dotnet user-secrets set --project BuberDinner.Api/ "JwtSettings:Secret" "super-secret-key-from-user-secrets"`:
   Used to set a key with a value, key will match inside the `appsettings.json`.
 - `dotnet user-secrets list --project BuberDinner.Api/`: Used to check all the
   secrets stored.
@@ -131,5 +131,5 @@ public static IServiceCollection AddInfrastructure(this IServiceCollection servi
   `public record RegisterRequest(Guid Id, string FirstName, string LastName);`
 - Multiple methods can be chained when registering a service:
   `builder.Services.AddApplication().AddInfrastructure();`
-- When working with settings, withing the class that holds the properties, a
+- When working with settings, within the class that holds the properties, a
   const can be used to hold the section name.
