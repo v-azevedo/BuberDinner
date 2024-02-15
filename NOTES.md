@@ -1,6 +1,6 @@
-# Clean Architecture & Domain Driven Design (DDD) - [Vídeo Tutorial](https://www.youtube.com/watch?v=fhM0V2N1GpY&list=PLzYkqgWkHPKBcDIP5gzLfASkQyTdy0t4k)
+# Clean Architecture & Domain Driven Design (DDD) - [Video Tutorial](https://www.youtube.com/watch?v=fhM0V2N1GpY&list=PLzYkqgWkHPKBcDIP5gzLfASkQyTdy0t4k)
 
-### Outsite --> Inside: (Presentation + Infrastructure --> DB) --> Application --> Domain
+## Outside --> Inside: (Presentation + Infrastructure --> DB) --> Application --> Domain
 
 - Presentation: Web API, MVC, Razor Pages, SAP(Angular, React, Vue)
 - Infrastructure: Persistence, Identity, File System, System Clock
@@ -50,11 +50,6 @@ public static IServiceCollection AddApplication(this IServiceCollection services
 - `builder.Services.AddApplication();`
 
 ## Part 2
-
-- #### JWT Token Generator
-- #### Options Pattern for Injecting JWT Settings
-- #### Using `dotnet user-secrets` for Development
-- #### Sneak-peak at Debugging in VSCode
 
 ### JWT Token Generator
 
@@ -123,6 +118,15 @@ public static IServiceCollection AddInfrastructure(this IServiceCollection servi
 - `dotnet user-secrets list --project BuberDinner.Api/`: Used to check all the
   secrets stored.
 
+## Part 3
+
+### Repository Pattern
+
+- Entities are stored inside the Domain Layer: `User.cs`.
+- The Application Layer will hold the interface that represents the repository.
+- Inside the Infrastructure Layer will be the actual implementation for the
+  repository.
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
@@ -133,3 +137,6 @@ public static IServiceCollection AddInfrastructure(this IServiceCollection servi
   `builder.Services.AddApplication().AddInfrastructure();`
 - When working with settings, within the class that holds the properties, a
   const can be used to hold the section name.
+- [Declaration Pattern](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns#declaration-and-type-patterns):
+  `if (_userRepository.GetUserByEmail(email) is not User user)` allows the
+  declaration of a variable after passing the pattern check.
