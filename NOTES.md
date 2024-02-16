@@ -127,6 +127,109 @@ public static IServiceCollection AddInfrastructure(this IServiceCollection servi
 - Inside the Infrastructure Layer will be the actual implementation for the
   repository.
 
+## Part 4
+
+### Global Error Handling
+
+#### Middleware
+
+- Middleware folder inside the Presentation Layer.
+- Get access to the request: `private readonly RequestDelegate _next;`.
+- Invoke method that will be responsible for interjecting the request and
+  handling any exception.
+
+```c#
+  public async Task Invoke(HttpContext context)
+{
+  try
+  {
+    await _next(context);
+  }
+  catch (Exception ex)
+  {
+    await HandleExceptionAsync(context, ex);
+  }
+}
+```
+
+- Method to handle the exceptions.
+
+```c#
+private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+{
+  var code = HttpStatusCode.InternalServerError;
+  var result = JsonSerializer.Serialize(new { error = "An error occurred while processing your request" });
+  context.Response.ContentType = "application/json";
+  context.Response.StatusCode = (int)code;
+  return context.Response.WriteAsync(result);
+}
+```
+
+- Attach through the `app.UseMiddleware<ErrorHandlingMiddleware>();`.
+
+#### Exception Filter Attribute
+
+- Filters folder inside the Presentation Layer.
+- Suffix "FilterAttribute".
+- Extends class `ExceptionFilterAttribute`;
+- Implements exception handling by overriding `OnException`;
+
+```c#
+public override void OnException(ExceptionContext context)
+{
+  var exception = context.Exception;
+  context.Result = new ObjectResult(new { error = "An error occurred while processing your request" })
+  {
+    StatusCode = 500
+  };
+  context.ExceptionHandled = true;
+}
+```
+
+- Attach by adding an option
+  `builder.Services.AddControllers(opt => opt.Filters.Add<ErrorHandlingFilterAttribute>());`.
+
+#### Problem Details
+
+- Problem Details for HTTP APIs: [RFC][def]
+- Built in class to help generating Problem Details according to the
+  specification.
+
+```c#
+new ProblemDetails
+{
+  Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
+  Title = "An error occurred while processing your request",
+  Status = (int)HttpStatusCode.InternalServerError,
+};
+```
+
+- Response status codes types: [Section 6][def2]
+
+#### Error Endpoint
+
+- `app.UseExceptionHandler("/error");`: Adds a middleware to the pipeline that
+  will catch exceptions, log them, reset the request path, and re-execute the
+  request.
+
+- Needs a controller that will also extend from the `ControllerBase` class and
+  the route specified above.
+
+- Implements by default the RFC Problem Details when returning
+  `return Problem();`.
+
+## Part 5
+
+### Flow Control
+
+#### Exceptions
+
+#### OneOf
+
+#### FluentResults
+
+#### ErrorOr & Domain Errors
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
@@ -140,3 +243,6 @@ public static IServiceCollection AddInfrastructure(this IServiceCollection servi
 - [Declaration Pattern](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns#declaration-and-type-patterns):
   `if (_userRepository.GetUserByEmail(email) is not User user)` allows the
   declaration of a variable after passing the pattern check.
+
+[def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
+[def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
