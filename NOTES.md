@@ -218,17 +218,90 @@ new ProblemDetails
 - Implements by default the RFC Problem Details when returning
   `return Problem();`.
 
+#### Custom Problem Details Factory
+
+- [GitHub][def3]: Extract from here the implementation and then add to it as
+  necessary.
+- Injected as such:
+  `builder.Services.AddSingleton<ProblemDetailsFactory, BuberDinerProblemDetailsFactory>();`.
+
 ## Part 5
 
 ### Flow Control
 
 #### Exceptions
 
+- Create a interface `IServiceException.cs` to declare the necessary properties.
+- Implement a exception class for each error that must be handled as such:
+  `DuplicateEmailException.cs`.
+- The exception class must extend the `Exception` class and implement the
+  `IServiceException` interface.
+
 #### OneOf
+
+- `dotnet add BuberDinner.Application/ package oneof`.
+- `OneOf<AuthenticationResult, DuplicateEmailError> Register`: OneOf can receive
+  multiples types that are expected as result.
+- Match method allows to check what was the type received by the method that
+  could throw an exception.
+
+```c#
+return registerResult.Match(
+  authResult => Ok(MapAuthResult(authResult)),
+  _ => Problem(statusCode: StatusCodes.Status409Conflict, title: "Email already exists.")
+);
+```
 
 #### FluentResults
 
+- `dotnet add BuberDinner.Application/ package fluentResults`
+- `Result<AuthenticationResult> Register`: Will always return the type passed or
+  a list errors.
+- Implement the IError interface from the package fluentResults,
+  `public class DuplicateEmailError : IError`.
+- `return Result.Fail<AuthenticationResult>(new[] { new DuplicateEmailError() });`:
+  A list of errors can be returned using the method Fail.
+- `registerResult.IsSuccess`: Can be use to check if the return type is not an
+  error.
+- `registerResult.Errors[0] is DuplicateEmailError`: Errors can be used to
+  access all the errors passed.
+
 #### ErrorOr & Domain Errors
+
+- All expected errors are specified inside de Domain Layer, folder structure:
+  `Common/Errors/Errors.User.cs`.
+- Errors can be specified as such, using the `Error` from ErrorOr:
+
+```c#
+public static Error DuplicateEmail => Error.Conflict(
+  code: "User.DuplicateEmail",
+  description: "Email is already in use");
+```
+
+- `ErrorOr<AuthenticationResult> Register`: Will return the specified type or an
+  `Error`. Simply return the error from the class inside de Domain Layer
+  `Errors.User.DuplicateEmail;`.
+
+```c#
+return authResult.Match( // Use Match to get access to all thrown errors or MatchFirst for only the first one.
+  authResult => Ok(MapAuthResult(authResult)),
+  _ => Problem(statusCode: StatusCodes.Status409Conflict, title: "User already exists")
+);
+```
+
+- Can also return a list of errors
+  `return new[] { Errors.Authentication.InvalidCredentials };`.
+- Controller base class can be used to handle multiple errors.
+
+```c#
+public class ApiController : ControllerBase
+{
+  protected IActionResult Problem(List<Error> errors)
+  {
+    return Problem(); // Missing implementation
+  }
+}
+```
 
 ## TIPS
 
@@ -243,6 +316,20 @@ new ProblemDetails
 - [Declaration Pattern](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/patterns#declaration-and-type-patterns):
   `if (_userRepository.GetUserByEmail(email) is not User user)` allows the
   declaration of a variable after passing the pattern check.
+- Declare a inline switch statement when passing values to a variable:
+
+```c#
+var (statusCode, message) = exception switch
+{
+  DuplicateEmailException => (StatusCodes.Status409Conflict, "Email already exists."),
+  _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+};
+```
+
+- Use this `HttpContext.Items["errors"] = errors;` to inject data inside the
+  http context to be used elsewhere.
 
 [def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
 [def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
+[def3]:
+  https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
