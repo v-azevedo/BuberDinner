@@ -303,6 +303,50 @@ public class ApiController : ControllerBase
 }
 ```
 
+## Part 6
+
+### CQRS + MediatR
+
+#### CQS vs. CQRS
+
+- CQS: Command Query Separation. A command(procedure) does something but does
+  not return a result, A query(function or attribute) returns a result but does
+  not change the state.
+- CQRS: Command Query Responsibility Segregation: "..The fundamental difference
+  is that CQRS objects are split into two objects, one containing the Commands
+  one containing the Queries."
+
+#### MediatR + Mediator Pattern
+
+- Commands are registered as records and must specify the arguments values and
+  the response,
+  `public record Login(string Email, string Password) : IRequest<ErrorOr<AuthenticationResult>>;`
+- Command handler:
+  `public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<AuthenticationResult>>`,
+  "IRequestHandler" receives the command and the type of the response.
+- `services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));`:
+  `typeof(DependencyInjection).Assembly`, mediatR will search inside the project
+  in which this class belongs to, for "handlers, queries and commands". Any
+  class that belongs to the MediatR assembly can be used.
+- `private readonly ISender _mediator;`: Use ISender instead of IMediator
+  interface to follow the interface segregation principle.
+
+#### Split by Feature & Clean Architecture
+
+- Organize the folder structure as such:
+
+```json
+"Authentication": {
+  "Common": {},
+  "Commands": {
+    "Register": {} // Files with suffix "Command" and "CommandHandler"
+  },
+  "Queries": {
+    "Login": {} // Files with suffix "Query" and "QueryHandler"
+  }
+}
+```
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution

@@ -95,6 +95,5 @@ public class BuberDinerProblemDetailsFactory : ProblemDetailsFactory
         {
             problemDetails.Extensions.Add("errorsCodes", errors.Select(e => e.Code));
         }
-
     }
 }
