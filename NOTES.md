@@ -347,6 +347,49 @@ public class ApiController : ControllerBase
 }
 ```
 
+## Part 7
+
+### Object Mapping with Mapster
+
+- `dotnet add BuberDinner.Api/ package Mapster`.
+- `dotnet add BuberDinner.Api/ package Mapster.DependencyInjection`.
+- `var command = _mapper.Map<RegisterCommand>(request);`: Register the values
+  received by the body and maps to the register command.
+- Works without configuration when both the object source and the one being
+  mapped have the same properties.
+- When working with two objects that don't match properties, a configuration can
+  be set. One way of doing is by implementing the interface as follows:
+  `public class AuthenticationMappingConfig : IRegister`.
+
+```c#
+public void Register(TypeAdapterConfig config)
+{
+  config.NewConfig<AuthenticationResult, AuthenticationResponse>() // Populate AuthenticationResponse with the values from AuthenticationResult
+  .Map(dest => dest.Token, src => src.Token)
+  // The values from the AuthenticationResponse will be populate with the values from the src inside the User,
+  // will ignore the already mapped "dest.Token".
+  .Map(dest => dest, src => src.User);
+}
+```
+
+- Have a dependencyInjection class inside the Mapping folder so it can handle
+  its own mappings.
+
+```c#
+ public static IServiceCollection AddMappings(this IServiceCollection services)
+{
+  var config = TypeAdapterConfig.GlobalSettings;
+  config.Scan(Assembly.GetExecutingAssembly()); // Receives the assembly that will be scanned.
+  services.AddSingleton(config); // Add this global configuration as a singleton, and therefore only instantiated once;
+  services.AddScoped<IMapper, ServiceMapper>(); // Add scoped the Service Mapper to the IMapper, is necessary for dependency injection.
+  return services;
+}
+```
+
+- Use the same principle from the other layers to create a dependency injection
+  class inside the presentation layer that will be calling the AddMappings
+  method.
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
