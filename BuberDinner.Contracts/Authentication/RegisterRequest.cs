@@ -2,7 +2,7 @@ namespace BuberDinner.Contracts.Authentication;
 
 public record RegisterRequest(
     string FirstName,
-    string Lastname,
+    string LastName,
     string Email,
     string Password
 );
