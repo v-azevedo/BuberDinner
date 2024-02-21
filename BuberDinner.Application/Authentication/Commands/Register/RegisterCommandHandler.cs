@@ -21,6 +21,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<A
 
     public async Task<ErrorOr<AuthenticationResult>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
+        await Task.CompletedTask; // Only to fix warning, remove when implementing persistence database.
+
         if (_userRepository.GetUserByEmail(request.Email) is not null)
             return Errors.User.DuplicateEmail;
 
