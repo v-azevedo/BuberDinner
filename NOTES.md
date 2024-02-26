@@ -379,7 +379,7 @@ public void Register(TypeAdapterConfig config)
  public static IServiceCollection AddMappings(this IServiceCollection services)
 {
   var config = TypeAdapterConfig.GlobalSettings;
-  config.Scan(Assembly.GetExecutingAssembly()); // Receives the assembly that will be scanned.
+  config.Scan(Assembly.GetExecutingAssembly()); // Receives the assembly that will be scanned, in this case only the executing one: "AuthenticationMappingConfig".
   services.AddSingleton(config); // Add this global configuration as a singleton, and therefore only instantiated once;
   services.AddScoped<IMapper, ServiceMapper>(); // Add scoped the Service Mapper to the IMapper, is necessary for dependency injection.
   return services;
@@ -389,6 +389,83 @@ public void Register(TypeAdapterConfig config)
 - Use the same principle from the other layers to create a dependency injection
   class inside the presentation layer that will be calling the AddMappings
   method.
+
+## Part 8
+
+### MediatR + [FluentValidation](https://www.youtube.com/watch?v=-ix1hzWr2ws)
+
+#### Pipeline Behavior with MediatR
+
+- `dotnet add BuberDinner.Application/ package FluentValidation`.
+
+- `dotnet add BuberDinner.Application/ package FluentValidation.AspNetCore`:
+  Used to avoid having to manually add each validator.
+
+- `IPipelineBehavior<RegisterCommand, AuthenticationResult>`: Implement the
+  interface to have access to the "Handle" method on which will have access to
+  the "request" and the "next" that calls the actual handler.
+
+```c#
+// before the handler
+var result = await next();
+// after the handler
+```
+
+- `services.AddScoped<IPipelineBehavior<RegisterCommand, ErrorOr<AuthenticationResult>>, ValidateRegisterCommandBehavior>();`:
+  Dependency Injection as scoped using the `IPipelineBehavior` and passing both
+  the command and the type response.
+
+- Validators files go inside the command or query folder that will be
+  validating, and receive the suffix "Validator".
+
+```c#
+public class RegisterCommandValidator : AbstractValidator<RegisterCommand> // Simple validator example
+{
+  public RegisterCommandValidator()
+  {
+    RuleFor(x => x.FirstName).NotEmpty();
+    RuleFor(x => x.LastName).NotEmpty();
+    RuleFor(x => x.Email).NotEmpty();
+    RuleFor(x => x.Password).NotEmpty();
+  }
+}
+```
+
+- `services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());`: Used
+  to automatically include all the validator on the executing assembly.
+
+- `private readonly IValidator<RegisterCommand> _validator;`: Dependency
+  injection must receive the type of command inside the `IValidator`.
+
+```c#
+// Used to convert from FluentValidation errors to ErrorOr
+var errors = validationResult.Errors.ConvertAll(validationFailure => Error.Validation( // ConvertAll simply returns a new list of the target type
+  validationFailure.PropertyName,
+  validationFailure.ErrorMessage));
+```
+
+- Using the following implementation, allows for a generic validation behavior
+  class.
+
+```c#
+public class ValidationBehavior<TRequest, TResponse> :
+  IPipelineBehavior<TRequest, TResponse>
+      where TRequest : IRequest<TResponse> // Must use the IRequest from FluentValidator
+      where TResponse : IErrorOr // Whatever response type will be expected
+```
+
+- `return (dynamic)errors;`: The dynamic keyword will try to parse the values
+  received into the expected response for the method, in this case `ErrorOr`.
+  Must only be used when certain that the value can be parsed, otherwise a
+  runtime exception will be thrown.
+
+- `services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));`:
+  Used to register a reference to a generic dependency injection.
+
+- Instead of returning a `Problem()` for validation errors "ControllerBase" has
+  the method `return ValidationProblem(modelStateDictionary);`, that receives a
+  modelStateDictionary that can be implemented as such
+  `modelStateDictionary.AddModelError(error.Code, error.Description);`.
 
 ## TIPS
 
@@ -415,6 +492,16 @@ var (statusCode, message) = exception switch
 
 - Use this `HttpContext.Items["errors"] = errors;` to inject data inside the
   http context to be used elsewhere.
+
+- When using dependency injection in which the received argument may be null, it
+  must be explicitly set.
+
+```c#
+public ValidationBehavior(IValidator<TRequest>? validator = null)
+{
+  _validator = validator;
+}
+```
 
 [def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
 [def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
