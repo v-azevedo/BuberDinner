@@ -515,6 +515,18 @@ public class ValidationBehavior<TRequest, TResponse> :
   useful for auth requests when passing the `[Authorize]` attribute to all
   controllers via inheritance.
 
+## Part 10
+
+### Mapping Software Logic Using Process Modeling
+
+- [Youtube](https://www.youtube.com/watch?v=1pBGc7kKOAA&list=PLzYkqgWkHPKBcDIP5gzLfASkQyTdy0t4k&index=10)
+
+## Part 11
+
+### 3 Steps for Modeling a Complex Domain
+
+- [Youtube](https://www.youtube.com/watch?v=f6G46rqkePc&list=PLzYkqgWkHPKBcDIP5gzLfASkQyTdy0t4k&index=11)
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
@@ -561,8 +573,11 @@ services.AddSingleton(Options.Create(jwtSettings));
 // Same as services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName)), but allows access to the settings.
 ```
 
+- Event Storming: [Figma][figma]
+
 [def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
 [def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
 [def3]:
   https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
 [authorization]: https://youtu.be/7ILCRfPmQxQ?si=VaE5X_6wyUtIM9d-&t=835
+[figma]: https://www.figma.com/community/file/1153317295146512523/event-storming
