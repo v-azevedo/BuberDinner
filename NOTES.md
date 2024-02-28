@@ -467,6 +467,54 @@ public class ValidationBehavior<TRequest, TResponse> :
   modelStateDictionary that can be implemented as such
   `modelStateDictionary.AddModelError(error.Code, error.Description);`.
 
+## Part 9
+
+### JWT Bearer Authentication
+
+#### Include authentication for the dinners controller
+
+- In the simplest way, the idea is to change the value of `isAuthenticated` from
+  httpContext to `true`, and later only allow users with this updated status to
+  access the list of dinners.
+- Within the program pipeline, the `app.UseAuthentication()` will access the
+  authentication header from the coming request and then redirect for the
+  correct authentication handler where the token will be validated and if
+  necessary extracted.
+- `UseAuthentication` will use objects that must be added as dependency
+  injections references, inside the infrastructure layer. There will be
+  configured the dependencies and what to validate from the token.
+- `services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme);`:
+  Responsible for adding the necessary dependencies, receives a default schema.
+  [Further Explanation](https://youtu.be/7ILCRfPmQxQ?si=4nem-B4CHiG04cP9&t=455).
+
+```c#
+// Add the parameters that will be validated
+.AddJwtBearer(options =>
+{
+  options.TokenValidationParameters = new TokenValidationParameters()
+  {
+    ValidateIssuer = true, // Validate this parameter
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = jwtSettings.Issuer, // Uses this value to validate against
+    ValidAudience = jwtSettings.Audience,
+    IssuerSigningKey = new SymmetricSecurityKey(
+      Encoding.UTF8.GetBytes(jwtSettings.Secret)
+    )
+  };
+});
+```
+
+- Explanation of how authorization pipeline will work, [link][authorization]. In
+  short, the authorization middleware will decide if the user has authorization
+  that access the request.
+
+- `[Authorize]` attribute tells the controller that only requests from
+  authorized users will be accepted and `[AllowAnonymous]` will allow any user,
+  useful for auth requests when passing the `[Authorize]` attribute to all
+  controllers via inheritance.
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
@@ -503,7 +551,18 @@ public ValidationBehavior(IValidator<TRequest>? validator = null)
 }
 ```
 
+- A way to get access to settings inside the dependency injection class itself.
+
+```c#
+var jwtSettings = new JwtSettings();
+configuration.Bind(JwtSettings.SectionName, jwtSettings);
+
+services.AddSingleton(Options.Create(jwtSettings));
+// Same as services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName)), but allows access to the settings.
+```
+
 [def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
 [def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
 [def3]:
   https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
+[authorization]: https://youtu.be/7ILCRfPmQxQ?si=VaE5X_6wyUtIM9d-&t=835
