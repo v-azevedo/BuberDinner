@@ -3,7 +3,9 @@ using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
 using BuberDinner.Domain.Common.Errors;
 using BuberDinner.Domain.Entities;
+
 using ErrorOr;
+
 using MediatR;
 
 namespace BuberDinner.Application.Authentication.Commands.Register;
@@ -19,13 +21,15 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<A
         _userRepository = userRepository;
     }
 
-
     public async Task<ErrorOr<AuthenticationResult>> Handle(RegisterCommand command, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
+
         // 1. Validate the user doesn't exist
         if (_userRepository.GetUserByEmail(command.Email) != null)
+        {
             return Errors.User.DuplicateEmail;
+        }
 
         // 2. Create user (generate unique ID) & Persist to DB
         var user = new User
@@ -43,7 +47,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<A
 
         return new AuthenticationResult(
             user,
-            token
-        );
+            token);
     }
 }

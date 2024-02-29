@@ -3,9 +3,13 @@ using BuberDinner.Application.Authentication.Common;
 using BuberDinner.Application.Authentication.Queries.Login;
 using BuberDinner.Contracts.Authentication;
 using BuberDinner.Domain.Common.Errors;
+
 using ErrorOr;
+
 using MapsterMapper;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,8 +36,7 @@ public class AuthenticationController : ApiController
 
         return authResult.Match(
             authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
-            errors => Problem(errors)
-        );
+            errors => Problem(errors));
     }
 
     [HttpPost("login")]
@@ -52,17 +55,6 @@ public class AuthenticationController : ApiController
 
         return authResult.Match(
           authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
-          errors => Problem(errors)
-      );
-    }
-
-    private static AuthenticationResponse MapAuthResult(AuthenticationResult authResult)
-    {
-        return new AuthenticationResponse(
-                    authResult.User.Id,
-                    authResult.User.FirstName,
-                    authResult.User.LastName,
-                    authResult.User.Email,
-                    authResult.Token);
+          errors => Problem(errors));
     }
 }

@@ -26,5 +26,4 @@ public sealed class Bill : AggregateRoot<BillId>
         CreatedDateTime = createdDateTime;
         UpdatedDateTime = updatedDateTime;
     }
-
 }

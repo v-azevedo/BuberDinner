@@ -1,4 +1,3 @@
-
 namespace BuberDinner.Contracts.Authentication;
 
 public record AuthenticationResponse

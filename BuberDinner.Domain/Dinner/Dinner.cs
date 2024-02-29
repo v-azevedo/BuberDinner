@@ -11,18 +11,18 @@ public sealed class Dinner : AggregateRoot<DinnerId>
 {
     private readonly List<Reservation> _reservations = new();
 
-    public string Name { get; } //
-    public string Description { get; } //
+    public string Name { get; }
+    public string Description { get; }
     public DateTime StartDateTime { get; }
     public DateTime EndDateTime { get; }
     public DateTime? StartedDateTime { get; }
     public DateTime? EndedDateTime { get; }
     public DinnerStatus Status { get; }
     public bool IsPublic { get; }
-    public HostId HostId { get; } //
-    public MenuId MenuId { get; } //
-    public string ImageUrl { get; } //
-    public Location Location { get; } //
+    public HostId HostId { get; }
+    public MenuId MenuId { get; }
+    public string ImageUrl { get; }
+    public Location Location { get; }
     public IReadOnlyList<Reservation> Reservations => _reservations.AsReadOnly();
     public DateTime CreatedDateTime { get; }
     public DateTime UpdatedDateTime { get; }
