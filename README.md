@@ -537,6 +537,24 @@ public class ValidationBehavior<TRequest, TResponse> :
 
 - [Entity][def5]
 
+## Part 13
+
+### Domain Layer Structure & Skeleton
+
+- Each Aggregate receives is own folder, that will contain the Entities,
+  ValueObjects and any other type that may be attached to the particular
+  aggregate.
+
+```json
+"Menu":
+{
+  "Entities": ["MenuItem", "MenuSection"],
+  "ValueObjects": ["MenuId", "MenuItemId", "MenuSectionId"],
+  "Menu"
+}
+
+```
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
