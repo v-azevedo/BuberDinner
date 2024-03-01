@@ -2,9 +2,13 @@ using BuberDinner.Application.Authentication.Commands.Register;
 using BuberDinner.Application.Authentication.Common;
 using BuberDinner.Application.Authentication.Queries.Login;
 using BuberDinner.Contracts.Authentication;
+
 using ErrorOr;
+
 using MapsterMapper;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,7 +48,6 @@ public class AuthenticationController : ApiController
 
         return authResult.Match(
             authResult => Ok(_mapper.Map<AuthenticationResponse>(authResult)),
-            errors => Problem(errors)
-        );
+            errors => Problem(errors));
     }
 }

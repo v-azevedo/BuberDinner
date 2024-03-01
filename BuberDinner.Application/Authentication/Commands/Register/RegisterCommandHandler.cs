@@ -3,7 +3,9 @@ using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
 using BuberDinner.Domain.Common.Errors;
 using BuberDinner.Domain.Entities;
+
 using ErrorOr;
+
 using MediatR;
 
 namespace BuberDinner.Application.Authentication.Commands.Register;
@@ -24,14 +26,16 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<A
         await Task.CompletedTask; // Only to fix warning, remove when implementing persistence database.
 
         if (_userRepository.GetUserByEmail(request.Email) is not null)
+        {
             return Errors.User.DuplicateEmail;
+        }
 
         var user = new User
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
-            Password = request.Password
+            Password = request.Password,
         };
 
         _userRepository.AddUser(user);
@@ -40,7 +44,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<A
 
         return new AuthenticationResult(
             user,
-            token
-        );
+            token);
     }
 }

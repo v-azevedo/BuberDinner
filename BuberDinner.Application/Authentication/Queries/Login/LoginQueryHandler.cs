@@ -3,7 +3,9 @@ using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
 using BuberDinner.Domain.Common.Errors;
 using BuberDinner.Domain.Entities;
+
 using ErrorOr;
+
 using MediatR;
 
 namespace BuberDinner.Application.Authentication.Queries.Login;
@@ -24,16 +26,19 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, ErrorOr<Authenticat
         await Task.CompletedTask; // Only to fix warning, remove when implementing persistence database.
 
         if (_userRepository.GetUserByEmail(request.Email) is not User user)
+        {
             return Errors.Authentication.InvalidCredentials;
+        }
 
         if (user.Password != request.Password)
+        {
             return Errors.Authentication.InvalidCredentials;
+        }
 
         var token = _jwtTokenGenerator.TokenGenerator(user.Id, user.FirstName, user.LastName);
 
         return new AuthenticationResult(
           user,
-          token
-        );
+          token);
     }
 }
