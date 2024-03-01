@@ -555,6 +555,12 @@ public class ValidationBehavior<TRequest, TResponse> :
 
 ```
 
+## Part 14
+
+### REST + DDD + CA + CQRS
+
+- Nothing new, everything here follows what was already presented in the previous sections.
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
@@ -605,12 +611,9 @@ services.AddSingleton(Options.Create(jwtSettings));
 
 [def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
 [def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
-[def3]:
-  https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
+[def3]: https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
 [authorization]: https://youtu.be/7ILCRfPmQxQ?si=VaE5X_6wyUtIM9d-&t=835
 [figma]: https://www.figma.com/community/file/1153317295146512523/event-storming
-[def4]:
-  https://learn.microsoft.com/pt-br/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects
+[def4]: https://learn.microsoft.com/pt-br/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects
 [def5]: https://youtu.be/weGLBPky43U?si=1JHCbM0x1Q6kzdXV&t=303
-[def6]:
-  https://stackoverflow.com/questions/2734914/whats-the-difference-between-iequatable-and-just-overriding-object-equals
+[def6]: https://stackoverflow.com/questions/2734914/whats-the-difference-between-iequatable-and-just-overriding-object-equals

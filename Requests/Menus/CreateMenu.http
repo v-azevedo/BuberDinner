@@ -1,0 +1,23 @@
+@hostId=dasda
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyNDMzYjg5Mi0zZDA2LTRjNDQtYjkxOC1iNDM1YmZlODJhNWYiLCJnaXZlbl9uYW1lIjoiVmljdG9yIiwiZmFtaWx5X25hbWUiOiJBemV2ZWRvIiwianRpIjoiY2U2MGVlY2EtNzMwZS00NDM4LTk5OGItMTFjZmU1Y2UzZWMwIiwiZXhwIjoxNzA5MzIxMTQyLCJpc3MiOiJCdWJlckRpbm5lciIsImF1ZCI6IkJ1YmVyRGlubmVyIn0.dx9s_KU2JUvMWx9EYIkyx9VoRu44NbxPEiKnGXXlwJE
+
+POST {{host}}/hosts/{{$guid}}/menus
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Yummy Menu",
+  "description": "A menu with yummy food",
+  "sections": [
+    {
+      "name": "Appetizers",
+      "description": "Starters",
+      "items": [
+        {
+          "name": "Fried Pickles",
+          "description": "Deep fried pickles"
+        }
+      ]
+    }
+  ]
+}
