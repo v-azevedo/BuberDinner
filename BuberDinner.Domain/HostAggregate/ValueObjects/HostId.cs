@@ -16,6 +16,11 @@ public sealed class HostId : ValueObject
         return new(Guid.NewGuid());
     }
 
+    public static HostId ConvertFrom(string value)
+    {
+        return new(Guid.Parse(value));
+    }
+
     public override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;
