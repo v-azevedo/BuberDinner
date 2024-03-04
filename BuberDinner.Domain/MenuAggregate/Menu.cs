@@ -43,7 +43,6 @@ public sealed class Menu : AggregateRoot<MenuId>
         string name,
         string description,
         HostId hostId,
-        AverageRating averageRating,
         List<MenuSection>? sections)
     {
         return new(
@@ -51,7 +50,7 @@ public sealed class Menu : AggregateRoot<MenuId>
             name,
             description,
             hostId,
-            averageRating,
+            AverageRating.CreateNew(),
             sections ?? new());
     }
 }
