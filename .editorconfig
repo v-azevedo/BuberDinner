@@ -411,3 +411,6 @@ dotnet_diagnostic.SA1009.severity = none
 
 # SA1602:
 dotnet_diagnostic.SA1602.severity = none
+
+[*/Migrations/*]
+generated_code = true

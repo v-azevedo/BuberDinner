@@ -5,8 +5,8 @@ namespace BuberDinner.Domain.MenuAggregate.Entities;
 
 public sealed class MenuItem : Entity<MenuItemId>
 {
-    public string Name { get; }
-    public string Description { get; }
+    public string Name { get; private set; }
+    public string Description { get; private set; }
 
     private MenuItem(MenuItemId menuItemId, string name, string description)
         : base(menuItemId)
@@ -19,4 +19,10 @@ public sealed class MenuItem : Entity<MenuItemId>
     {
         return new(MenuItemId.CreateUnique(), name, description);
     }
+
+#pragma warning disable CS8618
+    private MenuItem()
+    {
+    }
+#pragma warning disable CS8618
 }
