@@ -555,6 +555,76 @@ public class ValidationBehavior<TRequest, TResponse> :
 
 ```
 
+## Part 14
+
+### REST + DDD + CA + CQRS
+
+- Nothing new, everything here follows what was already presented in the previous sections.
+
+## Part 15
+
+### EF Core, DDD and Clean Architecture
+
+#### DDD & EF Core - Enforcing DDD Principles
+
+- Aggregate identifier should be unique within the entire system
+- Entity identifier should be unique within the aggregate
+- ValueObjects don't need a identifier
+- Changes to one aggregate shouldn't affect other aggregates
+
+#### 3 Steps for mapping an aggregate to a relational database
+
+- Implement DbContext by creating a class that extends `DbContext` from EFCore
+- Pass to the constructor the `DbContextOptions<BuberDinnerDbContext>` and extends from the base class
+- Create `DbSet<Menu>` property
+- The `DbContext` class must have a reference inside the dependency injection by using `services.AddDbContext<BuberDinnerDbContext>(options => options.UseSqlServer());`
+- Update the MenuRepository to use the `DbContext` from BuberDinnerDbContext and remember to save the change to the database with `_dbContext.SaveChanges()`
+- Create a class that will implement the interface `IEntityTypeConfiguration<Menu>`, where the mapping will be configured for the Menu aggregate.
+- `ib.HasKey(nameof(MenuItem.Id), "MenuSectionId", "MenuId");`: Composite key
+
+```c#
+// Set the backing field for the Items property to be used when populated from the database.
+sb.Navigation(s => s.Items).Metadata.SetField("_items");
+sb.Navigation(s => s.Items).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+/*
+Since the Sections property is of type IReadOnlyList,
+We need to set the backing field to be used when populated from the database.
+*/
+builder.Metadata.FindNavigation(nameof(Menu.Sections))!
+  .SetPropertyAccessMode(PropertyAccessMode.Field);
+```
+
+- For the configuration to be used, the following code snipped was used inside the dbContext class:
+
+```c#
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+  modelBuilder.ApplyConfigurationsFromAssembly(typeof(BuberDinnerDbContext).Assembly);
+  base.OnModelCreating(modelBuilder);
+}
+```
+
+#### EF Core's Fluent API & DDD
+
+#### SQL Server on a Docker container
+
+- Image: `docker pull mcr.Microsoft.com/mssql/server:2022-latest`
+- Run: `docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Victor\!123" -p 1433:1433 --name mssql -d mcr.microsoft.com/mssql/server:2022-latest`
+- Update database with migrations: `dotnet ef database update -p BuberDinner.Infrastructure/ -s BuberDinner.Api/ --connection "Server=localhost;Database=BuberDinner;User Id=SA;Password=Victor\!123;Encrypt=false;" --runtime linux-x64`
+
+#### Migrations and more using the EF Core CLI
+
+- For the command dotnet ef migrations to work, is necessary that the startup project have the package `Microsoft.EntityFrameworkCore.Design`
+- `dotnet ef migrations add MigrationTitle -p BuberDinner.Infrastructure/ -s BuberDinner.Api/`: -p is the project that will generate the migration and -s the startup project.
+- The aggregates and all of its dependencies that will be used on the migration need to have private set for its properties and a constructor with no parameters.
+- Disable analyzer for generated code from migrations
+
+```markdown
+[*/Migrations/*]
+generated_code = true
+```
+
 ## TIPS
 
 - `dotnet sln add $(ls -r **/*.csproj)`: Includes all projects to the solution
@@ -605,12 +675,9 @@ services.AddSingleton(Options.Create(jwtSettings));
 
 [def]: https://datatracker.ietf.org/doc/html/rfc7807#section-3
 [def2]: https://https://datatracker.ietf.org/doc/html/rfc7231#section-6
-[def3]:
-  https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
+[def3]: https://github.com/dotnet/aspnetcore/blob/main/src/Mvc/Mvc.Core/src/Infrastructure/DefaultProblemDetailsFactory.cs
 [authorization]: https://youtu.be/7ILCRfPmQxQ?si=VaE5X_6wyUtIM9d-&t=835
 [figma]: https://www.figma.com/community/file/1153317295146512523/event-storming
-[def4]:
-  https://learn.microsoft.com/pt-br/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects
+[def4]: https://learn.microsoft.com/pt-br/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects
 [def5]: https://youtu.be/weGLBPky43U?si=1JHCbM0x1Q6kzdXV&t=303
-[def6]:
-  https://stackoverflow.com/questions/2734914/whats-the-difference-between-iequatable-and-just-overriding-object-equals
+[def6]: https://stackoverflow.com/questions/2734914/whats-the-difference-between-iequatable-and-just-overriding-object-equals
